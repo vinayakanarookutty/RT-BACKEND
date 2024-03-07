@@ -5,7 +5,7 @@ app.use(bodyparser.urlencoded({extended:true}))
 var home=require('./home')
 app.set('view engine','ejs')
 app.set('views','./views')
-
+app.use(express.json());
 app.listen("3000",()=>
 {
     console.log("Server Started")

@@ -2,24 +2,18 @@ var express=require('express')
 var router=express.Router()
 var mongoose=require('mongoose')
 var bcrypt=require('bcrypt')
-mongoose.connect("mongodb://localhost:27017/sample4")
+mongoose.connect("mongodb://localhost:27017/rtdatabase")
 var userSchema=mongoose.Schema({
-    userName:String,
-    lastName:String,
-    email:String,
-    password:String
+  name:String,
+  userName:String,
+  email:String,
+  password:String,
+  country:String
 })
 var UserModal=mongoose.model("user",userSchema)
 
-router.get("/",(req,res)=>{
-  res.render('LoginPage',{status:"ok"})
-})
-router.get("/signup",(req,res)=>{
-    res.render('CreateUser')
-  })
-  router.get("/home",(req,res)=>{
-    res.render('Home')
-  })
+
+
 
   router.post("/login",async(req,res)=>{
     console.log(req.body)
@@ -29,10 +23,13 @@ router.get("/signup",(req,res)=>{
     bcrypt.compare(req.body.password,user.password).then((response)=>{
         if(response)
         {
-            res.render('Home',{user})
+          return res.status(200).send(user)
         }
         else{
-           res.render('LoginPage',{status:"Password is Wrong"})
+          return res.status(404).json({
+            message: "Login Failed",
+          });
+  
         }
 
     })
@@ -44,19 +41,35 @@ router.get("/signup",(req,res)=>{
    }    
    
   })
-  router.post("/create-user",async(req,res)=>{
-    
-    var password=await bcrypt.hash(req.body.password,10)
-    var user= new UserModal({
-        userName:"Vinayak",
-        lastName:req.body.lastname,
-        email:req.body.email,
-        password:password
-    })
-    user.save()
-    res.redirect("/")
+  router.post("/createResourcePerson",async(req,res)=>{
+    if(req.body)
+    {
+      console.log(req.body)
+      var password=await bcrypt.hash(req.body.password,10)
+      var user= new UserModal({
+          name:req.body.userName,
+          userName:req.body.userName,
+          email:req.body.email,
+          password:password,
+          country:req.body.country
+      })
+      user.save().then(()=>{
+        return res.status(200)
+        .json({
+          message: "Login successful",
+        });
+      })
 
+    }
+    else
+    {
+      return res.status(404)
+        .json({
+          message: "Internal Server Error",
+        });
 
+    }
+  
 
   })
 module.exports=router
